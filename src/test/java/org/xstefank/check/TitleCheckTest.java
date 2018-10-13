@@ -2,7 +2,7 @@ package org.xstefank.check;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xstefank.TestUtils;
+import org.xstefank.utils.TestUtils;
 
 import java.util.regex.Pattern;
 

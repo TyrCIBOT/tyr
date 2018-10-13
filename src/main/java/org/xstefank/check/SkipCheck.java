@@ -17,7 +17,7 @@ public class SkipCheck {
 
     private static boolean skipByTitle(JsonNode payload, FormatConfig config) {
         if (config.getFormat().getSkipPatterns().getTitle() != null) {
-            Matcher titleMatcher = config.getFormat().getSkipPatterns().getTitle().matcher(payload.get(Utils.PULL_REQUEST).get(Utils.TITLE).asText());
+            Matcher titleMatcher = config.getFormat().getSkipPatterns().getTitle().matcher(payload.get(Utils.TITLE).asText());
             return titleMatcher.matches();
         }
         return false;
@@ -33,7 +33,7 @@ public class SkipCheck {
 
     private static boolean skipByDescriptionFirstRow(JsonNode payload, FormatConfig config) {
         if (config.getFormat().getSkipPatterns().getDescription() != null) {
-            String description = payload.get(Utils.PULL_REQUEST).get(Utils.BODY).asText();
+            String description = payload.get(Utils.BODY).asText();
             String firstRow = description.split(System.lineSeparator(), 2)[0];
             Matcher descriptionMatcher = config.getFormat().getSkipPatterns().getDescription().matcher(firstRow);
             return descriptionMatcher.matches();

@@ -22,7 +22,7 @@ public class RequiredRowsCheck implements Check {
     @Override
     public String check(JsonNode payload) {
         List<Row> requiredRows = new ArrayList<>(rows);
-        String description = payload.get(Utils.PULL_REQUEST).get(Utils.BODY).asText();
+        String description = payload.get(Utils.BODY).asText();
         Scanner scanner = new Scanner(description);
 
         while (scanner.hasNextLine() && !requiredRows.isEmpty()) {

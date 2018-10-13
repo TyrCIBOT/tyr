@@ -18,7 +18,7 @@ public class TitleCheck implements Check {
 
     @Override
     public String check(JsonNode payload) {
-        Matcher matcher = pattern.matcher(payload.get(Utils.PULL_REQUEST).get(Utils.TITLE).asText());
+        Matcher matcher = pattern.matcher(payload.get(Utils.TITLE).asText());
         if (!matcher.matches()) {
             return ERROR_MESSAGE;
         }

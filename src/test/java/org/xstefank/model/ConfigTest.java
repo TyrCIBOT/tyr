@@ -3,7 +3,7 @@ package org.xstefank.model;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xstefank.TestUtils;
+import org.xstefank.utils.TestUtils;
 import org.xstefank.check.TemplateChecker;
 
 public class ConfigTest {
@@ -15,7 +15,7 @@ public class ConfigTest {
 
     @Test
     public void testValidTemplateConfig() {
-        TemplateChecker templateChecker = new TemplateChecker(TestUtils.FOMAT_CONFIG);
+        TemplateChecker templateChecker = new TemplateChecker(TestUtils.FORMAT_CONFIG);
         Assert.assertTrue(templateChecker.checkPR(TestUtils.TEST_PAYLOAD).isEmpty());
     }
 

@@ -8,6 +8,7 @@ import org.jboss.logging.Logger;
 import org.xstefank.api.GitHubAPI;
 import org.xstefank.check.SkipCheck;
 import org.xstefank.check.TemplateChecker;
+import org.xstefank.whitelist.WhitelistProcessing;
 import org.xstefank.verification.InvalidConfigurationException;
 import org.xstefank.verification.VerificationHandler;
 import org.xstefank.model.CommitStatus;
@@ -28,23 +29,17 @@ public class WebHookEndpoint {
 
     private static final Logger log = Logger.getLogger(WebHookEndpoint.class);
     private static final FormatConfig config = readConfig();
+    private static WhitelistProcessing whitelistProcessing = null;
     private TemplateChecker templateChecker = new TemplateChecker(config);
 
     @POST
     @Path("/pull-request")
     @Consumes(MediaType.APPLICATION_JSON)
     public void processPullRequest(JsonNode payload) {
-        if (!SkipCheck.shouldSkip(payload, config)) {
-            String errorMessage = templateChecker.checkPR(payload);
-            if (errorMessage != null) {
-                log.info("updating status");
-
-                GitHubAPI.updateCommitStatus(config.getRepository(),
-                        payload.get(Utils.PULL_REQUEST).get(Utils.HEAD).get(Utils.SHA).asText(),
-                        errorMessage.isEmpty() ? CommitStatus.SUCCESS : CommitStatus.ERROR,
-                        config.getStatusUrl(),
-                        errorMessage.isEmpty() ? "valid" : errorMessage, "PR format check");
-            }
+        if (Utils.IS_WHITELISTING_ENABLED) {
+            processWithWhitelisting(payload);
+        } else {
+            processWithoutWhitelisting(payload);
         }
     }
 
@@ -69,5 +64,48 @@ public class WebHookEndpoint {
         } catch (IOException | InvalidConfigurationException e) {
             throw new IllegalArgumentException("Cannot load configuration file", e);
         }
+    }
+
+    private void processWithWhitelisting(JsonNode payload) {
+        if (whitelistProcessing == null) {
+            whitelistProcessing = new WhitelistProcessing(config);
+        }
+
+        if (payload.has(Utils.PULL_REQUEST)) {
+            triggerTyr(payload);
+        } else if (payload.has(Utils.ISSUE)) {
+            whitelistProcessing.process(payload);
+        }
+    }
+
+    private void processWithoutWhitelisting(JsonNode payload) {
+        if (payload.has(Utils.PULL_REQUEST)) {
+            triggerTyr(payload);
+        }
+    }
+
+    private String runChecksOnPullRequestPayload(JsonNode payload) {
+        if (!SkipCheck.shouldSkip(payload, config)) {
+            return templateChecker.checkPR(payload);
+        }
+        return null;
+    }
+
+    private void sendResponse(String errorMessage, JsonNode payload) {
+        if (errorMessage != null) {
+            log.info("updating status");
+
+            GitHubAPI.updateCommitStatus(config.getRepository(),
+                    payload.get(Utils.HEAD).get(Utils.SHA).asText(),
+                    errorMessage.isEmpty() ? CommitStatus.SUCCESS : CommitStatus.ERROR,
+                    config.getStatusUrl(),
+                    errorMessage.isEmpty() ? "valid" : errorMessage, "PR format check");
+        }
+    }
+
+    private void triggerTyr(JsonNode payload) {
+        payload = Utils.removePullRequestElement(payload);
+        String errorMessage = runChecksOnPullRequestPayload(payload);
+        sendResponse(errorMessage, payload);
     }
 }

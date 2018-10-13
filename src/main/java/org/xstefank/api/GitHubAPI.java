@@ -46,29 +46,43 @@ public class GitHubAPI {
                 .header(HttpHeaders.AUTHORIZATION, "token " + oauthToken)
                 .post(json);
 
-        log.info("Status update: " + response.getStatus());
+        log.info("Github status update: " + response.getStatus());
         response.close();
     }
 
     public static JsonNode getJsonWithCommits(JsonNode payload) {
+        return getJsonFromUri(getCommitsUri(payload));
+    }
+
+    public static JsonNode getJsonWithPullRequest(JsonNode payload) {
+        return getJsonFromUri(getPullRequestUri(payload));
+    }
+
+    private static JsonNode getJsonFromUri(URI uri) {
         Client restClient = ClientBuilder.newClient();
-        WebTarget target = restClient.target(getUriFromPayload(payload));
+        WebTarget target = restClient.target(uri);
 
         Response response = target.request()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "token " + oauthToken)
                 .get();
 
-        JsonNode commitsJson = response.readEntity(JsonNode.class);
+        JsonNode json = response.readEntity(JsonNode.class);
         response.close();
 
-        return commitsJson;
+        return json;
     }
 
-    private static URI getUriFromPayload(JsonNode payload) {
-        String url = payload.get(Utils.PULL_REQUEST).get(Utils.URL).asText();
+    private static URI getCommitsUri(JsonNode payload) {
+        String url = payload.get(Utils.URL).asText();
         return UriBuilder.fromPath(url)
                 .path(Utils.COMMITS)
+                .build();
+    }
+
+    private static URI getPullRequestUri(JsonNode payload) {
+        String url = payload.get(Utils.ISSUE).get(Utils.PULL_REQUEST).get(Utils.URL).asText();
+        return UriBuilder.fromPath(url)
                 .build();
     }
 

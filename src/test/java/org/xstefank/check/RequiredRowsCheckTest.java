@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xstefank.TestUtils;
+import org.xstefank.utils.TestUtils;
 import org.xstefank.model.yaml.Row;
 
 import java.io.IOException;

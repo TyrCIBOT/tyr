@@ -1,5 +1,6 @@
 package org.xstefank.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,9 @@ public class Utils {
     public static final String TOKEN_ENV = "GITHUB_OAUTH_TOKEN";
     public static final String JBOSS_CONFIG_DIR = "jboss.server.config.dir";
     public static final String TEMPLATE_FORMAT_URL = "template.format.url";
+    public static final String USERLIST_FILE_NAME = "user.list";
+    public static final String ADMINLIST_FILE_NAME = "admin.list";
+    public static final String WHITELIST_ENABLED = "whitelist.enabled";
 
     //PR payload
     public static final String PULL_REQUEST = "pull_request";
@@ -25,10 +29,26 @@ public class Utils {
     public static final String TITLE = "title";
     public static final String COMMITS = "commits";
 
+    //Issue payload
+    public static final String ISSUE = "issue";
+    public static final String COMMENT = "comment";
+    public static final String USER = "user";
+    public static final String LOGIN = "login";
+    public static final String ACTION = "action";
+
     //Commit payload
     public static final String COMMIT = "commit";
     public static final String MESSAGE = "message";
     public static final String URL = "url";
+
+    // Teamcity API
+    public static final String TEAMCITY_HOST_PROPERTY = "teamcity.host";
+    public static final String TEAMCITY_PORT_PROPERTY = "teamcity.port";
+    public static final String TEAMCITY_USER_PROPERTY = "teamcity.user";
+    public static final String TEAMCITY_PASS_PROPERTY = "teamcity.password";
+    public static final String TEAMCITY_BUILD_CONFIG = "teamcity.build.config";
+
+    public static final boolean IS_WHITELISTING_ENABLED = getBooleanProperty(WHITELIST_ENABLED);
 
     private static Properties tyrProperties = null;
 
@@ -58,5 +78,13 @@ public class Utils {
         if (target == null)
             target = getTyrProperty(TEMPLATE_FORMAT_URL);
         return target != null ? new URL(target) : null;
+    }
+
+    public static JsonNode removePullRequestElement(JsonNode payload) {
+        return payload.has(PULL_REQUEST) ? payload.get(PULL_REQUEST) : payload;
+    }
+
+    private static boolean getBooleanProperty(String key) {
+        return Boolean.parseBoolean(getTyrProperty(key));
     }
 }

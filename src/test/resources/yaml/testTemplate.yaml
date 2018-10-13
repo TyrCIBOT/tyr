@@ -11,3 +11,8 @@ format:
   additional:
     - TitleIssueLinkIncludedCheck
     - OneCommitOnlyCheck
+
+  commands:
+    AddUserCommand: ^ok\s+to\s+test$
+    RetestCommand: ^retest\s+this\s+please$
+    RemoveUserCommand: ^remove\s+user\s+please$
